@@ -2,7 +2,7 @@
 
 **A simple balenaCloud application to measure and record background radiation in your area. Radiation is detected with a cheaply available board, and connected to a Raspberry Pi to provide InfluxDB for datalogging and Grafana for pretty charts.**
 
-![grafana-dashboard](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/assets/grafana-dashboard.png)
+![grafana-dashboard](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/master/assets/grafana-dashboard.png)
 
 ## Hardware required
 
@@ -17,7 +17,7 @@
 
 There are 3 connections we need to make from the radiation detector board to the Raspberry Pi. They are +5V and Ground (GND) for power, and the output pulse line to detect the count. Note that this is called `VIN` which can be a bit confusing as this usually means ‘voltage input’ or something similar, but on this board, it’s the output.
 
-![pi-geiger-simple](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/assets/pi-geiger-simple.png)
+![pi-geiger-simple](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/master/assets/pi-geiger-simple.png)
 
 In this configuration you only need to provide 5 volt power to one of the two boards; if you’re powering the Pi with a standard micro-USB power supply, that will power the detector board via the connections we’ve just made, as well.
 
@@ -33,4 +33,4 @@ We recommend this button as the de-facto method for deploying new apps on balena
 
 Once the software has been deployed and downloaded to your device, the dashboard will be accessible on the local IP address of the device, or via the balenaCloud public URL feature.
 
-![public-url](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/assets/public-url.png)
+![public-url](https://raw.githubusercontent.com/balenalabs-incubator/background-radiation-monitor/master/assets/public-url.png)
