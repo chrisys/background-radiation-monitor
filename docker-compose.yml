@@ -3,10 +3,10 @@ volumes:
     sense-data:
 services:
   influxdb:
+    image: influxdb:1.8.10
     restart: always
-    build: ./influxdb
     volumes:
-      - 'sense-data:/data'
+      - sense-data:/var/lib/influxdb
   grafana:
     restart: always
     build: ./grafana
