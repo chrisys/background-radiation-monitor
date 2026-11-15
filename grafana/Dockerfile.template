@@ -3,6 +3,6 @@ FROM grafana/grafana:12.4.15
 USER root
 
 COPY ./grafana.ini /etc/grafana/grafana.ini
-COPY --chown=grafana:grafana ./provisioning /usr/src/app/provisioning
+COPY ./provisioning /usr/src/app/provisioning
 
 USER grafana
