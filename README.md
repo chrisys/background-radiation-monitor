@@ -178,6 +178,31 @@ Version 1.6.1 adds device-aware diagnostics to the Nginx front end without chang
 The device UUID shown by `/device-info` can be compared with the UUID in the balena Public Device URL. This is useful when an old or different device URL is being used.
 
 
+
+## NOAA planetary Kp space-weather context in v1.9.0
+
+Version 1.9.0 adds official NOAA / NWS Space Weather Prediction Center planetary K-index data to the Grafana dashboard. This is contextual environmental data; it does not alter the Geiger counter measurements or the CPM-to-dose estimate.
+
+The new `spaceweather` service fetches:
+
+- observed planetary Kp from `https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json`;
+- observed/estimated/predicted 3-day Kp data from `https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json`.
+
+The collector refreshes every five minutes by default and stores valid 0–9 Kp values in the existing InfluxDB bucket. NOAA's Kp products are three-hour indices/forecasts, so the five-minute fetch interval is intentionally more frequent than the source cadence while remaining lightweight.
+
+The dashboard adds, in English:
+
+- **Current observed planetary Kp**;
+- **3-day forecast peak Kp**;
+- **Planetary Kp — observed, estimated and 3-day forecast**;
+- **NOAA 3-day Kp forecast data**;
+- an English NOAA Kp/G-scale reference.
+
+Kp 5 or greater is the NOAA geomagnetic-storm threshold. The dashboard keeps observed, estimated, and predicted values visibly distinct so forecasts are not presented as measurements.
+
+The collector accepts both the current NOAA object-array JSON format and the older header-row array format. If NOAA is temporarily unavailable, existing data remain in InfluxDB and no synthetic values are generated.
+
+
 ## Access the dashboard
 
 Once the software has been deployed and downloaded to your device, Nginx listens on port 80 and proxies the dashboard to Grafana on its internal port 3000. The dashboard is accessible on the local IP address of the device, or via the balenaCloud public URL feature.
@@ -213,6 +238,10 @@ Before deploying, configure the following balenaCloud **Service Variables**:
 ### grafana service
 - `INFLUX_TOKEN`: set this to the same value as `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN`.
 
+### spaceweather service
+- `INFLUX_TOKEN`: set this to the same value as `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN`.
+- `NOAA_FETCH_INTERVAL_SECONDS` (optional): NOAA refresh interval. Defaults to `300` seconds.
+- `NOAA_HTTP_TIMEOUT_SECONDS` (optional): HTTP timeout for NOAA requests. Defaults to `20` seconds.
 
 The InfluxDB token and password are intentionally not stored in this repository.
 
