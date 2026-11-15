@@ -251,6 +251,29 @@ Only valid source values are stored. External-source failures do not alter CPM, 
 The dashboard keeps the external variables in separate panels with a common time axis and adds a 15-minute CPM reference panel, making temporal comparison easier without implying causation.
 
 
+
+## Runtime maintenance and image optimization in v1.11.0
+
+Version 1.11.0 refreshes the runtime stack while preserving the existing InfluxDB and Grafana persistent volumes and all J305 measurement behavior.
+
+Pinned runtime components:
+
+- Python `3.11.18-slim-bookworm` for `counter` and `spaceweather`;
+- `influxdb-client==1.50.0`;
+- `rpi-lgpio==0.6`;
+- InfluxDB `2.7.12`;
+- Grafana `12.4.15`;
+- Nginx `1.30.6-alpine`.
+
+The Python services now use the official slim Python image instead of the deprecated balenalib Python build image. Direct Python dependencies are pinned in per-service `requirements.txt` files so rebuilding the same Git revision does not silently select newer library releases.
+
+Grafana now builds directly from the official multi-architecture Grafana image instead of downloading and installing a Debian package during every build. The existing provisioning directory and persistent `grafana-data` volume are retained.
+
+The GitHub Actions workflow now uses Python 3.11 and additionally builds the counter, external-context, Grafana, and Nginx images. This catches dependency and container-build regressions before deployment.
+
+No database migration is introduced. The existing `sense-data` and `grafana-data` volumes keep the same paths and must not be deleted during the update.
+
+
 ## Access the dashboard
 
 Once the software has been deployed and downloaded to your device, Nginx listens on port 80 and proxies the dashboard to Grafana on its internal port 3000. The dashboard is accessible on the local IP address of the device, or via the balenaCloud public URL feature.
