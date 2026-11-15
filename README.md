@@ -203,6 +203,54 @@ Kp 5 or greater is the NOAA geomagnetic-storm threshold. The dashboard keeps obs
 The collector accepts both the current NOAA object-array JSON format and the older header-row array format. If NOAA is temporarily unavailable, existing data remain in InfluxDB and no synthetic values are generated.
 
 
+
+## Environmental and space-weather correlation context in v1.10.0
+
+Version 1.10.0 extends the external-context collector so the radiation measurements can be compared with local weather and additional space-weather indicators without changing the J305 counter logic.
+
+### Automatic weather location by default
+
+Weather geolocation is **automatic by default**. If `WEATHER_LATITUDE` and `WEATHER_LONGITUDE` are not set, the Raspberry Pi requests an approximate public-IP location from `ipwho.is`. The resulting latitude and longitude are then used with Open-Meteo.
+
+The stored weather point includes `location_source=ip`, latitude, longitude, and the returned city/region/country when available. IP geolocation is approximate and is suitable for general environmental context, but local rain can vary substantially over short distances.
+
+For a known fixed installation, manual coordinates can override automatic IP geolocation:
+
+```text
+WEATHER_LATITUDE=...
+WEATHER_LONGITUDE=...
+```
+
+When both values are present the stored location source becomes `manual`.
+
+Set `WEATHER_LOCATION_MODE=manual` only when automatic IP geolocation must be disabled; in that mode both coordinates are required.
+
+### Local weather context
+
+Open-Meteo provides current:
+
+- temperature;
+- relative humidity;
+- surface pressure;
+- precipitation;
+- rain.
+
+### Additional NOAA SWPC context
+
+The collector also stores the latest available:
+
+- solar-wind speed;
+- solar-wind proton density;
+- IMF Bz in GSM coordinates;
+- total IMF magnitude;
+- Kyoto Dst index distributed by NOAA SWPC;
+- GOES integral proton flux for the >=10 MeV channel.
+
+Only valid source values are stored. External-source failures do not alter CPM, GPIO, calibration, or the estimated dose-rate calculation.
+
+The dashboard keeps the external variables in separate panels with a common time axis and adds a 15-minute CPM reference panel, making temporal comparison easier without implying causation.
+
+
 ## Access the dashboard
 
 Once the software has been deployed and downloaded to your device, Nginx listens on port 80 and proxies the dashboard to Grafana on its internal port 3000. The dashboard is accessible on the local IP address of the device, or via the balenaCloud public URL feature.
@@ -241,7 +289,9 @@ Before deploying, configure the following balenaCloud **Service Variables**:
 ### spaceweather service
 - `INFLUX_TOKEN`: set this to the same value as `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN`.
 - `NOAA_FETCH_INTERVAL_SECONDS` (optional): NOAA refresh interval. Defaults to `300` seconds.
-- `NOAA_HTTP_TIMEOUT_SECONDS` (optional): HTTP timeout for NOAA requests. Defaults to `20` seconds.
+- `NOAA_HTTP_TIMEOUT_SECONDS` (optional): HTTP timeout for external requests. Defaults to `20` seconds.
+- `WEATHER_LOCATION_MODE` (optional): defaults to `auto`, which uses public-IP geolocation when manual coordinates are absent.
+- `WEATHER_LATITUDE` and `WEATHER_LONGITUDE` (optional): fixed installation coordinates. When both are provided they override automatic IP geolocation.
 
 The InfluxDB token and password are intentionally not stored in this repository.
 
