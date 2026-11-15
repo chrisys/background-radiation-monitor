@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Compile Python sources
         run: python -m py_compile counter/counter.py counter/metrics.py
@@ -35,9 +35,9 @@ jobs:
           docker run --rm \
             --add-host grafana:127.0.0.1 \
             -e BALENA_DEVICE_UUID=test-device \
-            -e BRM_VERSION=1.10.0 \
+            -e BRM_VERSION=1.11.0 \
             -v "${{ github.workspace }}/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro" \
-            nginx:1.28-alpine nginx -t
+            nginx:1.30.6-alpine nginx -t
 
   spaceweather-tests:
     runs-on: ubuntu-latest
@@ -48,13 +48,40 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install collector dependency
-        run: python -m pip install influxdb-client
+        run: python -m pip install -r spaceweather/requirements.txt
 
       - name: Compile external-context collector
         run: python -m py_compile spaceweather/collector.py spaceweather/test_collector.py
 
       - name: Run external-context parser tests
         run: python -m unittest discover -s spaceweather -p "test_*.py" -v
+
+  container-builds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build counter image
+        run: docker build -t brm-counter-test ./counter
+
+      - name: Build external-context image
+        run: docker build -t brm-spaceweather-test ./spaceweather
+
+      - name: Render and build Grafana image
+        run: |
+          cp grafana/Dockerfile.template grafana/Dockerfile
+          docker build -t brm-grafana-test ./grafana
+
+      - name: Build Nginx image
+        run: docker build -t brm-nginx-test ./nginx
+
+      - name: Verify pinned runtime versions
+        run: |
+          docker run --rm brm-counter-test python --version
+          docker run --rm brm-spaceweather-test python --version
+          docker run --rm --entrypoint /usr/share/grafana/bin/grafana brm-grafana-test --version
+          docker run --rm brm-nginx-test nginx -v
