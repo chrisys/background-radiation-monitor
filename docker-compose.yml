@@ -46,7 +46,7 @@ services:
     ports:
       - "80:80"
     environment:
-      BRM_VERSION: '1.8.2'
+      BRM_VERSION: '1.9.0'
     healthcheck:
       test:
         - CMD-SHELL
@@ -55,6 +55,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  spaceweather:
+    build: ./spaceweather
+    restart: always
+    depends_on:
+      - influxdb
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: balena
+      INFLUX_BUCKET: balena-sense
+      NOAA_FETCH_INTERVAL_SECONDS: '300'
 
   counter:
     build: ./counter
