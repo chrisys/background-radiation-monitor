@@ -1,11 +1,13 @@
-FROM balenalib/raspberrypi3-64-debian-python:3.10-bookworm-build
+FROM python:3.11.18-slim-bookworm
 
 WORKDIR /usr/app/src
 
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
 
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir influxdb_client
+COPY requirements.txt ./
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY *.py ./
 
