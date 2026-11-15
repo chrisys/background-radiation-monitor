@@ -26,7 +26,7 @@ HTTP_TIMEOUT_SECONDS = max(
 )
 
 INFLUX_URL = os.getenv("INFLUX_URL", "http://influxdb:8086")
-INFLUX_TOKEN = os.environ["INFLUX_TOKEN"]
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "balena")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "balena-sense")
 
@@ -197,6 +197,11 @@ def run_once(write_api):
 
 
 def main():
+    if not INFLUX_TOKEN:
+        raise RuntimeError(
+            "INFLUX_TOKEN is required to write NOAA data to InfluxDB"
+        )
+
     client = InfluxDBClient(
         url=INFLUX_URL,
         token=INFLUX_TOKEN,
