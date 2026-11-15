@@ -46,7 +46,7 @@ services:
     ports:
       - "80:80"
     environment:
-      BRM_VERSION: '1.9.0'
+      BRM_VERSION: '1.10.0'
     healthcheck:
       test:
         - CMD-SHELL
@@ -66,6 +66,7 @@ services:
       INFLUX_ORG: balena
       INFLUX_BUCKET: balena-sense
       NOAA_FETCH_INTERVAL_SECONDS: '300'
+      WEATHER_LOCATION_MODE: auto
 
   counter:
     build: ./counter
