@@ -17,7 +17,7 @@
   "title": "Background Radiation Monitor — J305",
   "uid": "pF3gRDiRk",
   "schemaVersion": 25,
-  "version": 7,
+  "version": 8,
   "refresh": "10s",
   "time": {
     "from": "now-12h",
@@ -456,6 +456,213 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 25,
+      "type": "row",
+      "title": "NOAA Space Weather — Planetary K-index",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "panels": []
+    },
+    {
+      "id": 26,
+      "type": "stat",
+      "title": "Current observed planetary Kp",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 36
+      },
+      "targets": [
+        {
+          "refId": "KP1",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -7d, stop: now()) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"observed\") |> last()"
+        }
+      ],
+      "description": "Latest observed 3-hour planetary Kp value from NOAA Space Weather Prediction Center. Kp 5 or greater indicates geomagnetic storm conditions on the NOAA scale.",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 9,
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 4
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 27,
+      "type": "stat",
+      "title": "3-day forecast peak Kp",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 36
+      },
+      "targets": [
+        {
+          "refId": "KP2",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -1h, stop: 4d) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"forecast\" and r.status == \"predicted\") |> max()"
+        }
+      ],
+      "description": "Highest NOAA predicted planetary Kp value currently stored for the next three days.",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 9,
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 4
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 30,
+      "type": "text",
+      "title": "Kp scale reference",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**NOAA planetary Kp scale**\\n\\nKp < 5: below geomagnetic storm level  \nKp 5: G1  •  Kp 6: G2  •  Kp 7: G3  •  Kp 8 / 9−: G4  •  Kp 9o: G5\\n\\nSource: NOAA / NWS Space Weather Prediction Center. Data are fetched from the official observed and 3-day forecast JSON products."
+      }
+    },
+    {
+      "id": 28,
+      "type": "timeseries",
+      "title": "Planetary Kp — observed, estimated and 3-day forecast",
+      "gridPos": {
+        "h": 10,
+        "w": 16,
+        "x": 0,
+        "y": 42
+      },
+      "targets": [
+        {
+          "refId": "KP3",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -7d, stop: now()) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"observed\") |> set(key: \"_field\", value: \"Observed Kp\")"
+        },
+        {
+          "refId": "KP4",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -1d, stop: 4d) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"forecast\" and r.status == \"estimated\") |> set(key: \"_field\", value: \"Estimated Kp\")"
+        },
+        {
+          "refId": "KP5",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -1d, stop: 4d) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"forecast\" and r.status == \"predicted\") |> set(key: \"_field\", value: \"Predicted Kp\")"
+        }
+      ],
+      "description": "NOAA SWPC planetary Kp context. Observed values are measured/published 3-hour indices; estimated values cover the interval in progress; predicted values are the NOAA 3-day forecast. Kp 5 is the geomagnetic-storm threshold.",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 9,
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "Planetary Kp",
+            "axisColorMode": "text",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 29,
+      "type": "table",
+      "title": "NOAA 3-day Kp forecast data",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 42
+      },
+      "targets": [
+        {
+          "refId": "KP6",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -1h, stop: 4d) |> filter(fn: (r) => r._measurement == \"space-weather-kp\" and r._field == \"kp\" and r.feed == \"forecast\" and r.status == \"predicted\") |> keep(columns: [\"_time\", \"_value\", \"status\"]) |> rename(columns: {_value: \"Kp\", status: \"Type\"}) |> sort(columns: [\"_time\"])"
+        }
+      ],
+      "description": "Current NOAA SWPC predicted Kp values in 3-hour intervals. Forecasts can change when NOAA issues a new forecast.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2
+        },
+        "overrides": []
+      }
     }
   ],
   "style": "dark",
@@ -488,5 +695,5 @@
     ]
   },
   "timezone": "",
-  "description": "J305 background-radiation monitor with signal diagnostics and Poisson counting uncertainty. CPM is the primary measurement; µSv/h remains an estimate until the complete detector is calibrated."
+  "description": "J305 background-radiation monitor with signal diagnostics, Poisson counting uncertainty, and NOAA SWPC planetary Kp space-weather context. CPM is the primary radiation measurement; µSv/h remains an estimate until calibration."
 }
