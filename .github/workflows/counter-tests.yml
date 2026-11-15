@@ -35,7 +35,7 @@ jobs:
           docker run --rm \
             --add-host grafana:127.0.0.1 \
             -e BALENA_DEVICE_UUID=test-device \
-            -e BRM_VERSION=1.11.0 \
+            -e BRM_VERSION=1.11.1 \
             -v "${{ github.workspace }}/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro" \
             nginx:1.30.6-alpine nginx -t
 
@@ -78,6 +78,11 @@ jobs:
 
       - name: Build Nginx image
         run: docker build -t brm-nginx-test ./nginx
+
+      - name: Verify Grafana provisioning is readable
+        run: |
+          docker run --rm --entrypoint /bin/sh brm-grafana-test -c \
+            'test -r /etc/grafana/grafana.ini && test -r /usr/src/app/provisioning/dashboards/balena-sense.json'
 
       - name: Verify pinned runtime versions
         run: |
