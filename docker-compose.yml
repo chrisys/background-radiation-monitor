@@ -35,7 +35,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - curl -fsS http://127.0.0.1:3000/api/health >/dev/null || exit 1
+        - wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1
       interval: 30s
       timeout: 5s
       retries: 5
