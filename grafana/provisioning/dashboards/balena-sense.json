@@ -17,7 +17,7 @@
   "title": "Background Radiation Monitor — J305",
   "uid": "pF3gRDiRk",
   "schemaVersion": 25,
-  "version": 8,
+  "version": 9,
   "refresh": "10s",
   "time": {
     "from": "now-12h",
@@ -663,6 +663,335 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 31,
+      "type": "row",
+      "title": "Environmental & Space-Weather Correlation Context",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "panels": []
+    },
+    {
+      "id": 32,
+      "type": "stat",
+      "title": "Surface pressure (hPa)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "WX1",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"surface_pressure_hpa\") |> last()"
+        }
+      ],
+      "description": "Current surface pressure from Open-Meteo for the automatically detected or manually configured installation location.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pressurehpa",
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 33,
+      "type": "stat",
+      "title": "Rain (mm)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "WX2",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"rain_mm\") |> last()"
+        }
+      ],
+      "description": "Current Open-Meteo rain amount for the installation location.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthmm",
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 34,
+      "type": "stat",
+      "title": "Temperature (°C)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "WX3",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"temperature_c\") |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 35,
+      "type": "stat",
+      "title": "Relative humidity (%)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "WX4",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"relative_humidity_pct\") |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 36,
+      "type": "stat",
+      "title": "Solar-wind speed (km/s)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "SW1",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"space-weather-solar-wind\" and r._field == \"speed_km_s\") |> last()"
+        }
+      ],
+      "description": "Latest solar-wind speed from NOAA SWPC.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 37,
+      "type": "stat",
+      "title": "IMF Bz GSM (nT)",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 53
+      },
+      "targets": [
+        {
+          "refId": "SW2",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -24h) |> filter(fn: (r) => r._measurement == \"space-weather-solar-wind\" and r._field == \"bz_gsm_nt\") |> last()"
+        }
+      ],
+      "description": "Latest north/south IMF Bz component in GSM coordinates from NOAA SWPC.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 38,
+      "type": "timeseries",
+      "title": "CPM — 15-minute mean correlation reference",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "targets": [
+        {
+          "refId": "CORR0",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"balena-sense\" and r._field == \"cpm\") |> aggregateWindow(every: 15m, fn: mean, createEmpty: false) |> set(key: \"_field\", value: \"CPM 15 min mean\")"
+        }
+      ],
+      "description": "Radiation reference series aligned with the environmental and space-weather panels below. Visual coincidence does not establish causation."
+    },
+    {
+      "id": 39,
+      "type": "timeseries",
+      "title": "Local weather — pressure",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 67
+      },
+      "targets": [
+        {
+          "refId": "WX5",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"surface_pressure_hpa\") |> set(key: \"_field\", value: \"Surface pressure hPa\")"
+        }
+      ],
+      "description": "Surface pressure aligned in time with CPM for visual comparison.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pressurehpa",
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 40,
+      "type": "timeseries",
+      "title": "Local weather — rain and precipitation",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 67
+      },
+      "targets": [
+        {
+          "refId": "WX6",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"rain_mm\") |> set(key: \"_field\", value: \"Rain mm\")"
+        },
+        {
+          "refId": "WX7",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"precipitation_mm\") |> set(key: \"_field\", value: \"Precipitation mm\")"
+        }
+      ],
+      "description": "Open-Meteo precipitation context. Rainfall can be spatially localized; IP-based location is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthmm",
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 41,
+      "type": "timeseries",
+      "title": "Local weather — temperature and humidity",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 75
+      },
+      "targets": [
+        {
+          "refId": "WX8",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"temperature_c\") |> set(key: \"_field\", value: \"Temperature °C\")"
+        },
+        {
+          "refId": "WX9",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"local-weather\" and r._field == \"relative_humidity_pct\") |> set(key: \"_field\", value: \"Relative humidity %\")"
+        }
+      ],
+      "description": "Temperature and relative humidity context for detector/environment interpretation."
+    },
+    {
+      "id": 42,
+      "type": "timeseries",
+      "title": "Solar wind — speed and IMF Bz",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 75
+      },
+      "targets": [
+        {
+          "refId": "SW3",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"space-weather-solar-wind\" and r._field == \"speed_km_s\") |> set(key: \"_field\", value: \"Solar-wind speed km/s\")"
+        },
+        {
+          "refId": "SW4",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"space-weather-solar-wind\" and r._field == \"bz_gsm_nt\") |> set(key: \"_field\", value: \"IMF Bz GSM nT\")"
+        }
+      ],
+      "description": "NOAA SWPC solar-wind context. Bz and speed use different units; compare timing and sign rather than absolute magnitudes."
+    },
+    {
+      "id": 43,
+      "type": "timeseries",
+      "title": "Dst geomagnetic index (nT)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 83
+      },
+      "targets": [
+        {
+          "refId": "SW5",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"space-weather-dst\" and r._field == \"dst_nt\") |> set(key: \"_field\", value: \"Dst nT\")"
+        }
+      ],
+      "description": "Kyoto Dst index as distributed by NOAA SWPC."
+    },
+    {
+      "id": 44,
+      "type": "timeseries",
+      "title": "GOES integral proton flux ≥10 MeV (pfu)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 83
+      },
+      "targets": [
+        {
+          "refId": "SW6",
+          "query": "from(bucket: \"balena-sense\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"space-weather-protons\" and r._field == \"flux_pfu\" and r.energy == \">=10MeV\") |> set(key: \"_field\", value: \"≥10 MeV proton flux pfu\")"
+        }
+      ],
+      "description": "Latest GOES integral proton flux series from NOAA SWPC. A logarithmic display may be useful during large events."
+    },
+    {
+      "id": 45,
+      "type": "table",
+      "title": "Weather location context",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 91
+      },
+      "targets": [
+        {
+          "refId": "LOC1",
+          "query": "from(bucket: \"balena-sense\") |> range(start: -7d) |> filter(fn: (r) => r._measurement == \"local-weather\" and (r._field == \"latitude\" or r._field == \"longitude\" or r._field == \"city\" or r._field == \"region\" or r._field == \"country\")) |> last() |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> keep(columns: [\"_time\", \"location_source\", \"latitude\", \"longitude\", \"city\", \"region\", \"country\"])"
+        }
+      ],
+      "description": "Location used for Open-Meteo. location_source=ip means approximate public-IP geolocation; manual means WEATHER_LATITUDE/WEATHER_LONGITUDE were supplied."
     }
   ],
   "style": "dark",
@@ -695,5 +1024,5 @@
     ]
   },
   "timezone": "",
-  "description": "J305 background-radiation monitor with signal diagnostics, Poisson counting uncertainty, and NOAA SWPC planetary Kp space-weather context. CPM is the primary radiation measurement; µSv/h remains an estimate until calibration."
+  "description": "J305 background-radiation monitor with signal diagnostics, Poisson counting uncertainty, NOAA SWPC planetary Kp/solar-wind/Dst/proton context, and automatically geolocated Open-Meteo weather context. CPM remains the primary radiation measurement."
 }
