@@ -79,6 +79,11 @@ jobs:
       - name: Build Nginx image
         run: docker build -t brm-nginx-test ./nginx
 
+      - name: Verify Grafana provisioning is readable
+        run: |
+          docker run --rm --entrypoint /bin/sh brm-grafana-test -c \
+            'test -r /etc/grafana/grafana.ini && test -r /usr/src/app/provisioning/dashboards/balena-sense.json'
+
       - name: Verify pinned runtime versions
         run: |
           docker run --rm brm-counter-test python --version
