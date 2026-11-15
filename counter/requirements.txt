@@ -1,0 +1,2 @@
+influxdb-client==1.50.0
+rpi-lgpio==0.6

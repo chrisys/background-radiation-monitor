@@ -1,24 +1,8 @@
-FROM balenalib/%%BALENA_MACHINE_NAME%%:bookworm
+FROM grafana/grafana:12.4.15
 
-COPY ./grafana.ini /usr/share/grafana/conf/custom.ini
-COPY ./provisioning /usr/src/app/provisioning
-COPY ./*.sh /usr/src/app/
+USER root
 
-RUN chmod +x /usr/src/app/*.sh
+COPY ./grafana.ini /etc/grafana/grafana.ini
+COPY --chown=grafana:grafana ./provisioning /usr/src/app/provisioning
 
-RUN install_packages \
-      ca-certificates \
-      curl \
-      fontconfig-config \
-      fonts-dejavu-core \
-      libfontconfig1 \
-      musl \
-      ucf \
-      jq \
-      wget
-
-RUN /usr/src/app/download.sh "%%BALENA_ARCH%%"
-
-RUN dpkg -i /tmp/grafana.deb && rm /tmp/grafana.deb
-
-CMD ["/bin/sh", "/usr/src/app/entry.sh"]
+USER grafana
